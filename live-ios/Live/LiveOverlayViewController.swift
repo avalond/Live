@@ -26,22 +26,23 @@ class LiveOverlayViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        textField.layer.borderWidth = 0.5
-        textField.layer.cornerRadius = 5
-        textField.layer.borderColor = UIColor.whiteColor().CGColor
-        
+      
         textField.delegate = self
         
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.estimatedRowHeight = 30
+        tableView.rowHeight = UITableViewAutomaticDimension
+
         
-        IHKeyboardAvoiding.setAvoidingView(inputContainer)
         
         NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(LiveOverlayViewController.tick(_:)), userInfo: nil, repeats: true)
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(LiveOverlayViewController.handleTap(_:)))
         view.addGestureRecognizer(tap)
         
+        IHKeyboardAvoiding.setAvoidingView(inputContainer)
+
         socket.on("upvote") {[weak self] data ,ack in
             self?.emitterView.emitImage(R.image.heart()!)
         }
@@ -56,7 +57,6 @@ class LiveOverlayViewController: UIViewController {
             let event = GiftEvent(dict: data[0] as! [String: AnyObject])
             self?.giftArea.pushGiftEvent(event)
         }
-        
     }
     
     
@@ -132,9 +132,6 @@ extension LiveOverlayViewController: UITableViewDataSource, UITableViewDelegate 
         return cell
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return CommentCell.heightForComment(comments[indexPath.row])
-    }
 }
 
 
@@ -159,7 +156,4 @@ class CommentCell: UITableViewCell {
         titleLabel.attributedText = comment.text.attributedComment()
     }
     
-    static func heightForComment(comment: Comment) -> CGFloat {
-        return comment.text.attributedComment().heightWithConstrainedWidth(160 - 2 * 6) + (5 + 6) * 2
-    }
 }
